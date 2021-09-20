@@ -7,9 +7,11 @@ import com.todo.service.TodoSortByName;
 
 public class TodoList {
 	private List<TodoItem> list;
+	//TodoItem 객체들을 list라는 이름의 멤버변수로 다루고 있다.
 
 	public TodoList() {
 		this.list = new ArrayList<TodoItem>();
+		//이 list는 arraylist의 TodoItem type으로 만들어진다.
 	}
 
 	public void addItem(TodoItem t) {
@@ -39,7 +41,7 @@ public class TodoList {
 		System.out.println("\n"
 				+ "inside list_All method\n");
 		for (TodoItem myitem : list) {
-			System.out.println(myitem.getTitle() + myitem.getDesc());
+			System.out.println("[" + myitem.getTitle() + "] " + myitem.getDesc() + " - " + myitem.getCurrent_date());
 		}
 	}
 	
