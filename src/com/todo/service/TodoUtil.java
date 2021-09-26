@@ -67,9 +67,21 @@ public class TodoUtil {
 		int i = 1;
 		for (TodoItem item : l.getList()) {
 			if (i == num) {
-				l.deleteItem(item);
-				count -= 1;
-				break;
+				System.out.println("[" + item.getCategory() + "]\t" 
+						+  item.getTitle() + " - " + item.getDesc() 
+						+ " - " + item.getDue_date() + " - " 
+						+ item.getCurrent_date());
+				System.out.println("위 항목을 삭제하시겠습니까? (y/n) ");
+				String isDelete = sc.next();
+				if(isDelete.charAt(0) == 'y') {
+					l.deleteItem(item);
+					count -= 1;
+					System.out.println("일정이 삭제되었습니다.");
+					break;
+				}
+				else {
+					break;
+				}
 			}
 			i ++ ;
 		}
@@ -87,6 +99,12 @@ public class TodoUtil {
 		int num = sc.nextInt();
 		int i = 1 ;
 		for (TodoItem item : l.getList()) {
+			if(num == i) {
+				System.out.println("[" + item.getCategory() + "]\t" 
+						+  item.getTitle() + " - " + item.getDesc() 
+						+ " - " + item.getDue_date() + " - " 
+						+ item.getCurrent_date());
+			}
 			i ++;
 		}
 		if (num > i ) {
@@ -94,7 +112,7 @@ public class TodoUtil {
 			return;
 		}
 
-
+		
 		System.out.println("해당 일정의 새로운 카테고리를 입력하세요.");
 		String new_category = sc.next();
 		
