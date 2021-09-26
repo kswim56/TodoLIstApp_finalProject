@@ -38,8 +38,17 @@ public class TodoMain {
 				break;
 				
 			case "ls":
-				System.out.println("[일정 목록입니다. 확인하고 기한 전에 끝냅시다.]");
 				TodoUtil.listAll(l);
+				break;
+				
+			case "find":
+				String keyword = sc.next();
+				TodoUtil.findItem(l, keyword);
+				break;
+			
+			case "find_cate":
+				String cate = sc.next();
+				TodoUtil.findCate(l, cate);
 				break;
 
 			case "ls_name_asc":
@@ -55,12 +64,25 @@ public class TodoMain {
 				isList = true;
 				break;
 				
+				
 			case "ls_date":
 				System.out.println("날짜순으로 정렬한 일정 목록입니다.");
 				l.sortByDate();
 				isList = true;
 				break;
-
+				
+			case "ls_date_desc":
+				System.out.println("날짜 역순으로 정렬한 일정 목록입니다.");
+				l.sortByDate();
+				l.reverseList();
+				isList = true;
+				break;
+			
+			case "ls_cate":
+				TodoUtil.lsCate(l);
+				break;
+			
+			
 			case "exit":
 				quit = true;
 				System.out.println("종료합니다.");
