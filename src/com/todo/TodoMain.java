@@ -1,22 +1,22 @@
 package com.todo;
 
 import java.util.Scanner;
-
 import com.todo.dao.TodoList;
 import com.todo.menu.Menu;
+import com.todo.service.DbConnect;
 import com.todo.service.TodoUtil;
 
 public class TodoMain {
 	
 	public static void start() {
-	
+		
 		Scanner sc = new Scanner(System.in);
 		TodoList l = new TodoList();
 		//l이라는 이름의 TodoLIst 객체를 하나 만들고 
 		//여기다가 리스트 안에 들어있는 내용들을 다루기 위해 l을 사용한다.
+		//l.importdata("TodoList.txt");
 		boolean isList = false;
 		boolean quit = false;
-		TodoUtil.loadList(l, "TodoList");
 		
 		Menu.displaymenu();
 		do {
@@ -42,46 +42,47 @@ public class TodoMain {
 				break;
 				
 			case "find":
-				String keyword = sc.next();
-				TodoUtil.findItem(l, keyword);
+				String keyword = sc.nextLine().trim();
+				TodoUtil.findList(l, keyword);
 				break;
 			
 			case "find_cate":
-				String cate = sc.next();
-				TodoUtil.findCate(l, cate);
+				String cate = sc.nextLine().trim();
+				TodoUtil.findCateList(l, cate);
 				break;
 
-			case "ls_name_asc":
+			case "ls_name":
 				System.out.println("이름순으로 정렬한 일정 목록입니다.");
-				l.sortByName();
-				isList = true;
+				TodoUtil.listAll(l, "title", 1);
 				break;
 
 			case "ls_name_desc":
 				System.out.println("이름 역순으로 정렬한 일정 목록입니다.");
-				l.sortByName();
-				l.reverseList();
-				isList = true;
+				TodoUtil.listAll(l, "title", 0);
 				break;
 				
 				
 			case "ls_date":
 				System.out.println("날짜순으로 정렬한 일정 목록입니다.");
-				l.sortByDate();
-				isList = true;
+				TodoUtil.listAll(l, "due_date", 1);
 				break;
 				
 			case "ls_date_desc":
 				System.out.println("날짜 역순으로 정렬한 일정 목록입니다.");
-				l.sortByDate();
-				l.reverseList();
-				isList = true;
+				TodoUtil.listAll(l, "due_date", 0);
 				break;
 			
 			case "ls_cate":
-				TodoUtil.lsCate(l);
+				TodoUtil.lsCateAll(l);
 				break;
 			
+			case "comp" :
+				String comp_num = sc.nextLine().trim();
+				TodoUtil.completed(l, comp_num);
+				break;
+			
+			case "ls_comp":
+				break;
 			
 			case "exit":
 				quit = true;
@@ -97,8 +98,8 @@ public class TodoMain {
 				break;
 			}
 			
-			if(isList) l.listAll();
+			// if(isList) l.listAll();
 		} while (!quit);
-		TodoUtil.saveList(l, "TodoList");
+		//TodoUtil.saveList(l, "TodoList");
 	}
 }
