@@ -9,18 +9,22 @@ public class TodoItem {
 	private int id;
 	private String category;
     private String title;
+    private String place;
     private String desc;
     private String due_date;
     private String current_date;
+    private int importance;
     private int Is_comp;
 
 
-    public TodoItem(String category, String title, String desc,
-    		String due_date){
+    public TodoItem(String category, String title, String desc, String place,
+    		String due_date, int importance){
         this.category=category;
     	this.title=title;
         this.desc=desc;
+        this.place = place;
         this.due_date=due_date;
+        this.importance = importance;
     }
     
 
@@ -85,16 +89,36 @@ public class TodoItem {
 		this.Is_comp = Is_comp;
 	}
 	
+	public String getPlace() {
+		return place;
+	}
+
+
+	public void setPlace(String place) {
+		this.place = place;
+	}
+
+
+	public int getImportance() {
+		return importance;
+	}
+
+
+	public void setImportance(int importance) {
+		this.importance = importance;
+	}
+
+
 	@Override
 	public String toString() {
 		String todo = null;
 		if(Is_comp == 0) {
-			todo = id + " [" + category + "] " + title + "-" + desc + 
-				"-" + due_date + "-" + current_date ;
+			todo = id + " [" + category + "] " + title + " - " + desc + " - " + place +
+				" - " + due_date + " - " + current_date + " - " + importance ;
 		}
 		else if(Is_comp == 1) {
-			todo =  id + " [" + category + "] " + title + " [V] " + "-" + desc + 
-					"-" + due_date + "-" + current_date;
+			todo =  id + " [" + category + "] " + title + " [V] " + " - " + desc + " - " + place + 
+					" - " + due_date + " - " + current_date + " - " + importance ;
 		}
 		return todo;
 	}

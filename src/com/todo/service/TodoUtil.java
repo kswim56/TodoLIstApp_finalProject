@@ -1,15 +1,14 @@
 package com.todo.service;
 
+import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import com.todo.dao.TodoItem;
 import com.todo.dao.TodoList;
-import com.todo.menu.Menu;
 
 public class TodoUtil {
 	
@@ -17,7 +16,8 @@ public class TodoUtil {
 	
 	public static void createItem(TodoList l) {
 		
-		String category, title, desc, due_date;
+		String category, title, desc, place, due_date;
+		int importance;
 		Scanner sc = new Scanner(System.in);
 		
 		System.out.println("\n"
@@ -38,31 +38,39 @@ public class TodoUtil {
 		System.out.println("\n일정의 내용을 입력하세요.");
 		desc = sc.nextLine().trim();
 		
+		System.out.println("\n일정이 시행되는 장소를 입력하세요.");
+		place = sc.nextLine().trim();
+		
 		System.out.println("\n일정의 마감일자를 적어주세요. YY/MM/DD 형식으로 작성해 주세요. ");
 		due_date = sc.next();
 		
-		TodoItem t = new TodoItem(category, title, desc, due_date);
-		if(l.addItem(t)>0)
-			System.out.println("일정이 추가되었습니다.");
+		System.out.println("\n일정의 중요도를 입력하세요.\n[1:매우 중요 / 2:중요 / 3:덜 중요 / 0:중요도 없음]");
+		importance = sc.nextInt();
 		
+		TodoItem t = new TodoItem(category, title, desc, place, due_date, importance);
+		if(l.addItem(t)>0)
+			System.out.println("일정이 추가되었습니다.\n");
+		
+		loadFs();
 	}
 
-	public static void deleteItem(TodoList l) {
-		
+	public static void deleteItem(TodoList l, String del_nums) {
 		Scanner sc = new Scanner(System.in);
-		
-		System.out.println("\n**일정 삭제 작업창입니다.**"
-				+ "\n삭제할 일정의 번호를 입력하세요.\n");
-
-		int index = sc.nextInt();
-		if (l.deleteItem(index) > 0)
-			System.out.println("일정이 삭제되었습니다.");
+		String[] del_num = del_nums.split(" ");
+		int count = 0;
+		for(String d : del_num) {
+			if (l.deleteItem(d) > 0) {
+				count ++;
+			}
+		}
+		System.out.println("\n총 " + count + "개의 일정을 삭제하였습니다.");
 	}
 
 
 	public static void updateItem(TodoList l) {
 		
-		String new_title, new_desc, new_category, new_due_date;
+		String new_title, new_desc, new_category, new_place, new_due_date;
+		int new_importance;
 		Scanner sc = new Scanner(System.in);
 		
 		System.out.println("\n"
@@ -84,36 +92,125 @@ public class TodoUtil {
 		System.out.println("\n새로운 내용을 입력하세요. ");
 		new_desc = sc.nextLine().trim();
 		
+		System.out.println("\n새로운 장소를 입력하세요. ");
+		new_place = sc.nextLine().trim();
+		
 		System.out.println("\n새로운 마감기한을 입력하세요. ");
 		new_due_date = sc.next();
+		
+		sc.nextLine();
+		System.out.println("\n새로운 중요도를 입력하세요.");
+		new_importance = sc.nextInt();
 
-		TodoItem t = new TodoItem( new_category, new_title, new_desc, new_due_date);
+		TodoItem t = new TodoItem( new_category, new_title, new_desc, new_place, new_due_date, new_importance);
 		t.setId(index);
 		if(l.updateItem(t) > 0)
-			System.out.println("\n일정이 업데이트 되었습니다!");
-
+			System.out.println("\n일정이 업데이트 되었습니다!\n");
+		loadFs();
 	}
 	
 	public static void listAll(TodoList l) {
 		//그냥 list를 내보내는 method
-			System.out.println("[현재 " + l.getCount() + "개의 일정이 있습니다. 확인하고 기한 전에 끝냅시다.]");
+			System.out.println("\n[현재 " + l.getCount() + "개의 일정이 있습니다. 확인하고 기한 전에 끝냅시다.]");
 			for (TodoItem item : l.getList()) {
 				System.out.println(item.toString());
 			}
+			System.out.println("");
+			loadFs();
 		}
 	
 	public static void listAll(TodoList l, String orderby, int ordering) {
 	//sort 해서 list를 내보내는 method
-		System.out.println("[현재 " + l.getCount() + "개의 일정이 있습니다. 확인하고 기한 전에 끝냅시다.]");
+		System.out.println("\n[현재 " + l.getCount() + "개의 일정이 있습니다. 확인하고 기한 전에 끝냅시다.]");
 		for (TodoItem item : l.getOrderedList(orderby, ordering)) {
 			System.out.println(item.toString());
 		}
 	}
 	
-	public static void completed(TodoList l, String comp_num) {
-		System.out.println( l.getList(comp_num));
-		System.out.println("해당 일정을 완료 처리 하였습니다. \n힘내서 다음 일정도 완료합시다.");
+	public static void list_week(TodoList l) {
+		System.out.println("\n이번 주의 일정입니다. 차근차근 열심히 끝내 보자구요!");
+		ArrayList<String> today = new ArrayList<String>();
+		ArrayList<String> tomr = new ArrayList<String>();
+		ArrayList<String> twodl = new ArrayList<String>();
+		ArrayList<String> threedl = new ArrayList<String>();
+		ArrayList<String> fivedl = new ArrayList<String>();
+		ArrayList<String> fourdl = new ArrayList<String>();
+		ArrayList<String> sixdl = new ArrayList<String>();
+		for (TodoItem item : l.getList()) {
+			int dl = l.getDaysLeft(item);
+			if(dl == 0) {
+				today.add("<<"+ item.getTitle() + "  -  " + item.getDesc() +">>");
+			}
+			else if(dl == 1) {
+				tomr.add("<<"+ item.getTitle() + "  -  " + item.getDesc() +">>");
+			}
+			else if(dl == 2) {
+				twodl.add("<<"+ item.getTitle() + "  -  " + item.getDesc() +">>");
+			}
+			else if(dl == 3) {
+				threedl.add("<<" + item.getTitle() + "  -  " + item.getDesc() +">>");
+			}
+			else if(dl == 4) {
+				fourdl.add("<<"+ item.getTitle() + "  -  " + item.getDesc() +">>");
+			}
+			else if(dl == 5) {
+				fivedl.add("<<"+ item.getTitle() + "  -  " + item.getDesc() +">>");
+			}
+			else if(dl == 6) {
+				sixdl.add("<<"+ item.getTitle() + "  -  " + item.getDesc() +">>");
+			}
+		}
+		System.out.println("\n===========================================Dashboard===========================================");
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(new Date());
+		DateFormat dateFormat = new SimpleDateFormat("MMM dd, E");
+		System.out.println("\n" + dateFormat.format(cal.getTime()));
+		System.out.println(today);
+		cal.add(Calendar.DATE, 1);
+		System.out.println("\n" + dateFormat.format(cal.getTime()));
+		System.out.println(tomr);
+		cal.add(Calendar.DATE, 1);
+		System.out.println("\n" + dateFormat.format(cal.getTime()));
+		System.out.println(twodl);
+		cal.add(Calendar.DATE, 1);
+		System.out.println("\n" + dateFormat.format(cal.getTime()));
+		System.out.println(threedl);
+		cal.add(Calendar.DATE, 1);
+		System.out.println("\n" + dateFormat.format(cal.getTime()));
+		System.out.println(fourdl);
+		cal.add(Calendar.DATE, 1);
+		System.out.println("\n" + dateFormat.format(cal.getTime()));
+		System.out.println(fivedl);
+		cal.add(Calendar.DATE, 1);
+		System.out.println("\n" + dateFormat.format(cal.getTime()));
+		System.out.println(sixdl);
+		System.out.println("\n=============================================================================================");
 	}
+	
+	public static void completed(TodoList l, String comp_nums) {
+		String[] comp_num = comp_nums.split(" ");
+		int count = 0;
+		for(String c : comp_num) {
+			if(l.completeItem(c) > 0) {
+				count ++;
+			}
+		}
+		System.out.println("\n총 " + count +"개의 일정을 완료 처리 하였습니다. \n힘내서 다음 일정도 완료합시다.\n");
+		loadFs();
+	}
+	
+	public static void lsComp(TodoList l) {
+		int count = 0;
+		for (TodoItem item : l.getList()) {
+			if(item.getIs_comp() == 1) {
+				System.out.println(item);
+				count ++;
+			}
+		}
+		System.out.println("\n총" + count + "개의 일정을 완료하였습니다. \n잘 하고 있습니다.\n");
+		loadFs();
+	}
+	
 	
 	public static void findList(TodoList l, String keyword) {
 		int count = 0;
@@ -143,56 +240,25 @@ public class TodoUtil {
 		System.out.println("\n총 " + count + "개의 카테고리가 등록되어 잇습니다.");
 	}
 	
-
-	/*
-	public static void saveList(TodoList l, String TodoList) {
-		FileWriter fw;
-		try {
-			fw = new FileWriter("TodoList.txt");
-			
-			for(TodoItem item : l.getList()) {
-			//for(A:B); B에 더이상 꺼낼 객체가 없을떄 까지 B에서 객체를 하나씩 꺼내서 A에 넣는다.
-				fw.write(item.toSaveString());
-			}
-			fw.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		count = 0;
-		System.out.println("일정 정보가 저장되었습니다.");
-	}
 	
-	public static void loadList(TodoList l, String TodoList) {
+	public static void loadFs() {
+		ArrayList<String> fs = new ArrayList<String>();
 		BufferedReader br;
 		try {
-			br = new BufferedReader(new FileReader("TodoList.txt"));
-			
+			br = new BufferedReader(new FileReader("TodoList_famous_saying.txt"));
 			String onelist;
+			int i=0;
 			while((onelist = br.readLine()) != null) {
 				StringTokenizer st = new StringTokenizer(onelist, "##");
-				String category = st.nextToken();
-				String title = st.nextToken();
-				String desc = st.nextToken();
-				String due_date = st.nextToken();
-				String current_date = st.nextToken();
-				
-				TodoItem t = new TodoItem(category, title, desc, due_date, current_date);
-				l.addItem(t);
-				count += 1;
+				fs.add(i, st.nextToken());
 			}
 			br.close();
-			System.out.println("저장된 일정 목록을 불러왔습니다. \n어서 확인하고 빨리 끝내버리는 성실한 한동인이 됩시다.");
+			int j = (int)((Math.random()*fs.size()*10)%10);
+			System.out.println(fs.get(j));
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-	
-		
 	}
-	
-	*/
 }

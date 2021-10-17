@@ -15,13 +15,11 @@ public class TodoMain {
 		//l이라는 이름의 TodoLIst 객체를 하나 만들고 
 		//여기다가 리스트 안에 들어있는 내용들을 다루기 위해 l을 사용한다.
 		//l.importdata("TodoList.txt");
-		boolean isList = false;
 		boolean quit = false;
 		
 		Menu.displaymenu();
 		do {
 			Menu.prompt();
-			isList = false;
 			String choice = sc.next();
 			switch (choice) {
 
@@ -30,7 +28,8 @@ public class TodoMain {
 				break;
 			
 			case "del":
-				TodoUtil.deleteItem(l);
+				String del_nums = sc.nextLine().trim();
+				TodoUtil.deleteItem(l, del_nums);
 				break;
 				
 			case "edit":
@@ -39,6 +38,10 @@ public class TodoMain {
 				
 			case "ls":
 				TodoUtil.listAll(l);
+				break;
+				
+			case "ls_week":
+				TodoUtil.list_week(l);
 				break;
 				
 			case "find":
@@ -77,11 +80,12 @@ public class TodoMain {
 				break;
 			
 			case "comp" :
-				String comp_num = sc.nextLine().trim();
-				TodoUtil.completed(l, comp_num);
+				String comp_nums = sc.nextLine().trim();
+				TodoUtil.completed(l, comp_nums);
 				break;
 			
 			case "ls_comp":
+				TodoUtil.lsComp(l);
 				break;
 			
 			case "exit":
@@ -97,9 +101,6 @@ public class TodoMain {
 				System.out.println("잘못된 명령어입니다! 메뉴를 보려면 help를 입력하세요");
 				break;
 			}
-			
-			// if(isList) l.listAll();
 		} while (!quit);
-		//TodoUtil.saveList(l, "TodoList");
 	}
 }
